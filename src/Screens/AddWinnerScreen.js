@@ -1,6 +1,6 @@
 
 import React, { useState, } from 'react';
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity, Platform, Modal, FlatList, Button, ScrollView, TextInput, Image, ImageEditor, Alert } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, ActionSheetIOS, TouchableOpacity, Platform, Modal, FlatList, Button, ScrollView, TextInput, Image, ImageEditor, Alert } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import colors from '../Colors/Color';
 import LottieView from 'lottie-react-native';
@@ -17,6 +17,7 @@ import FramesData from '../Data/FramesData';
 import ImagePicker from 'react-native-image-crop-picker';
 import AlertModal from '../Components/ModelComponents/EndDayFinalModal'
 import { set } from 'react-native-reanimated';
+import LotteryNameModal from '../Components/ModelComponents/LotteryNameModal';
 
 //import base64 from 'react-native-base64'
 //import ImgToBase64 from 'react-native-image-base64';
@@ -35,10 +36,13 @@ const AddWinnerScreen = (props) => {
   const LotteryNames = userCredentials.winner_lotteries
   const addWinnerUrl = userCredentials.add_winner
 
+
+
   //////////////////////////////// Component States ////////////////////////////////////////////
   const [resourcePath, setResourcePath] = useState(null);
   const [finalBase64image, setFinalBase64image] = useState(null);
   const [title, setTitle] = useState('');
+  const [selectedLotteryName, setSelectedLotteryName] = useState("Select");
   const [lotteryName, setLotteryName] = useState('');
   const [winningAmount, setWinningAmout] = useState('');
   const [formSubmit, setFormSubmit] = useState(false);
@@ -46,10 +50,11 @@ const AddWinnerScreen = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [responseData, setResponseData] = useState('');
-  const [responceAlert, setResponceAlert]=useState(false);
+  const [responceAlert, setResponceAlert] = useState(false);
+  const [lotteryNamesVisible, setlTotteryNamesVisible] = useState(false)
 
 
-  
+
   ////////////////////////////////////// Input Validation ///////////////////////////////////////
   function isValidTitle(title) {
     const re = /[^\n]+/
@@ -66,71 +71,73 @@ const AddWinnerScreen = (props) => {
   //////////////////////////////////// Launch Camera //////////////////////////////////////////
 
 
-const  cameraLaunch=(croping, mediaType = 'photo')=> {
-  ImagePicker.openCamera({
-    cropping: croping,
-    width: 600,
-    height: 800,
-    includeBase64: true,
-    maxWidth:600,
-    imageType:'png',
-    maxHeight:800,
-    includeExif: true,
-  
-    mediaType,
-  })
-    .then((image) => {
-      if (image && image != "undefined" ) {
-        setResourcePath(image.path);
-        setFinalBase64image('data:image/jpeg;base64,' + image.data);
-        setModalVisible(true);
-        
-      }
+  const cameraLaunch = (croping, mediaType = 'photo') => {
+    console.log("camera called")
+    ImagePicker.openCamera({
+      cropping: croping,
+      width: 600,
+      height: 800,
+      includeBase64: true,
+      maxWidth: 600,
+      imageType: 'png',
+      maxHeight: 800,
+      includeExif: true,
 
+      mediaType,
+     
     })
-    .catch((e) =>setResponceAlert(false) );
-}
+      .then((image) => {
+        if (image && image != "undefined") {
+          setResourcePath(image.path);
+          setFinalBase64image('data:image/jpeg;base64,' + image.data);
+          setModalVisible(true);
 
- ///////////////////////////// Image combine ////////////////////////////////////////
- /*function framePressHandler(url, capturedImgUri) {
-    //file:///data/user/0/com.dashboard/cache/rn_image_picker_lib_temp_3d538d70-0ac0-4ceb-a6d6-c290e1e9653b.jpg
-    let image1 = url
-    //console.log(capturedImgUri)
-    let image2 = capturedImgUri
+        }
+
+      })
+      .catch((e) => setResponceAlert(false));
+  }
+
+  ///////////////////////////// Image combine ////////////////////////////////////////
+  /*function framePressHandler(url, capturedImgUri) {
+     //file:///data/user/0/com.dashboard/cache/rn_image_picker_lib_temp_3d538d70-0ac0-4ceb-a6d6-c290e1e9653b.jpg
+     let image1 = url
+     //console.log(capturedImgUri)
+     let image2 = capturedImgUri
+    
+    console.log(finalBase64image);
    
-   console.log(finalBase64image);
-  
-  
-  
-    
-   ImagesCombineLibrary.combineImages([
-    Image.resolveAssetSource(image1),
-    { uri: image2 },
+   
+   
+     
+    ImagesCombineLibrary.combineImages([
      Image.resolveAssetSource(image1),
-
-  ]).then(base64 => {   
-    setFinalBase64image('data:image/jpeg;base64,' + base64)
-
-  })
-}
-
+     { uri: image2 },
+      Image.resolveAssetSource(image1),
+ 
+   ]).then(base64 => {   
+     setFinalBase64image('data:image/jpeg;base64,' + base64)
+ 
+   })
+ }
+ 
+   
+   /*console.log(resourcePath)
+   ImgToBase64.getBase64String(resourcePath)
+   .then(base64String => image2=base64String)
+     
+     
+   .catch(err => console.log(err));
   
-  /*console.log(resourcePath)
-  ImgToBase64.getBase64String(resourcePath)
-  .then(base64String => image2=base64String)
-    
-    
-  .catch(err => console.log(err));
- 
- 
- /* ImagesMerge.mergeImages([{
-    uri: finalBase64image,
-}, { uri: 'data:image/png;base64,' }],
- (result) => {
-    console.log(result);
-    setFinalBase64image('data:image/jpeg;base64,' + result)
-})
-};*/
+  
+  /* ImagesMerge.mergeImages([{
+     uri: finalBase64image,
+ }, { uri: 'data:image/png;base64,' }],
+  (result) => {
+     console.log(result);
+     setFinalBase64image('data:image/jpeg;base64,' + result)
+ })
+ };*/
 
 
 
@@ -173,11 +180,11 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
             'Authorization': 'Bearer ' + accessToken
           },
         }).then(response => response.json());
-          setResponseData(response);
-          setLoading(false);
+        setResponseData(response);
+        setLoading(false);
 
         if (response.success === 1) {
-         setResponceAlert(true);
+          setResponceAlert(true);
 
 
 
@@ -197,9 +204,9 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
         setLoading(false);
         Alert.alert(
           err.message + "!",
-               "Check your network and try again", [
-               { text: 'OK' },]
-       )
+          "Check your network and try again", [
+          { text: 'OK' },]
+        )
       }
     };
 
@@ -212,21 +219,22 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
 
       setFinalBase64image(null);
       setLotteryName('');
+      setSelectedLotteryName("Select")
       setResourcePath('');
       isValidWinningAmount(true);
-    
-    
-    
-    
+
+
+
+
       setFormSubmit(false);
 
-      if(title){
+      if (title) {
         textInput.clear();
         setTitle('');
-        
+
       }
 
-      if(winningAmount){
+      if (winningAmount) {
         titleInput.clear();
         setWinningAmout('')
       }
@@ -241,7 +249,7 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
   );
 
 
- 
+
 
   /////////////////////////////// On Back Button Press lounch camera //////////////////////////////////
   const frameBackHandler = () => {
@@ -250,8 +258,8 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
   }
 
 
-  const alertOkHandler=()=>{
-    
+  const alertOkHandler = () => {
+
 
     setFinalBase64image(null);
     setLotteryName('');
@@ -260,11 +268,20 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
     setWinningAmout('');
     setFormSubmit(false);
     textInput.clear();
-    titleInput.clear(); 
-    setResponseData(''); 
+    titleInput.clear();
+    setResponseData('');
     setResponceAlert(false);
     props.navigation.navigate('Home');
   }
+
+  const updateLotteryNameHandler = (name, id) => {
+    setSelectedLotteryName(name);
+    setLotteryName(id);
+    setlTotteryNamesVisible(!LotteryNameModal)
+  }
+
+
+
 
 
   return (
@@ -272,9 +289,9 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
 
 
 
-    <View style={[styles.container, {opacity: responseData?0.5:1}]}>
+    <View style={[styles.container, { opacity: responseData ? 0.5 : 1 }]}>
       {/************************************* Image Editing Modal *******************************/}
-     {/*  <View>
+      {/*  <View>
         {Platform.OS != 'web' ?
           <Modal
             animationType="slide"
@@ -341,27 +358,86 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
 
           </Modal> : null}
                 </View>*/}
-     {/*/////////////////////////// Conformation Alert successfully added winner ////////////////////// */}
-     <Modal
-                    animationType='fade'
-                    transparent={true}
+      {/*/////////////////////////// Conformation Alert successfully added winner ////////////////////// */}
+      <Modal
+        animationType='fade'
+        transparent={true}
 
-                    backgroundColor={colors.tertiary}
-                    visible={responceAlert}
-                    onRequestClose={() => {
-                        setResponceAlert(!responceAlert);
+        backgroundColor={colors.tertiary}
+        visible={responceAlert}
+        onRequestClose={() => {
+          setResponceAlert(!responceAlert);
 
 
-                    }}>
-                    <AlertModal
+        }}>
+        <AlertModal
 
-                        success={responseData.msg}
-                        onPress={alertOkHandler}
-                       
-                        onErrorPress={() => setResponceAlert(false)}
-                        successStatus={responseData.success}
-                    />
-                </Modal>
+          success={responseData.msg}
+          onPress={alertOkHandler}
+
+          onErrorPress={() => setResponceAlert(false)}
+          successStatus={responseData.success}
+        />
+      </Modal>
+      {/************************************* Image Editing Modal end *******************************/}
+      {/*/////////////////////////// Lottery name bottom up Modal ///////////////////////////////////// */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+
+        backgroundColor={colors.tertiary}
+        visible={lotteryNamesVisible}
+        onRequestClose={() => {
+          setlTotteryNamesVisible(!lotteryNamesVisible);
+
+
+        }}>
+        <View style={{ height: '100%', width: '100%', justifyContent: 'flex-end', }}>
+          <View
+            style={{
+              height: '50%', justifyContent: 'center',
+              alignItems: 'center', width: '100%', borderTopLeftRadius: 15, borderTopRightRadius: 15, backgroundColor: colors.tertiary
+            }}>
+            {/* <LotteryNameModal 
+                    onClosePress={()=>setlTotteryNamesVisible(!lotteryNamesVisible)}
+                    
+                  />*/}
+            <FlatList
+              data={LotteryNames}
+              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false}
+              scrollEnabled={true}
+              nestedScrollEnabled={true}
+              removeClippedSubviews
+              initialNumToRender={100}
+              updateCellsBatchingPeriod={10}
+              maxToRenderPerBatch={10}
+              windowSize={10}
+              style={{ width: "95%", backgroundColor: "#294F9E", 
+              borderTopLeftRadius: 20, borderTopRightRadius: 20, 
+              borderRadius: 20, marginBottom: 15, borderColor: '#98A2BF', 
+              borderWidth: 1, paddingBottom: 30 }}
+
+              keyExtractor={(item, index) => item.lottery_id}
+
+              renderItem={(itemData) =>
+                <LotteryNameModal
+                  lotteryName={itemData.item.lottery_name}
+                  onLotteryPress={() => updateLotteryNameHandler(itemData.item.lottery_name, itemData.item.lottery_id)}
+
+                />
+              }
+
+            />
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity onPress={() => setlTotteryNamesVisible(!lotteryNamesVisible)} style={styles.closeButton}>
+                <Text style={styles.buttonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+        </View>
+      </Modal>
       {/************************************* Image Editing Modal end *******************************/}
 
       <View style={styles.header}>
@@ -372,7 +448,7 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
         </TouchableOpacity>
         <Text style={styles.addWinnerText}>Add Winners</Text>
       </View>
-      <ScrollView style={{ alignSelf: 'center', width: '100%', paddingHorizontal: dew_Width>700? 10:6}} showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ alignSelf: 'center', width: '100%', paddingHorizontal: dew_Width > 700 ? 10 : 6 }} showsVerticalScrollIndicator={false}>
         {finalBase64image != null ?
           <View style={[styles.imageContainer, { justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }]}>
             <Image
@@ -381,7 +457,7 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
 
             /></View> :
           <View style={[styles.imageContainer, { borderColor: resourcePath === '' && formSubmit ? 'red' : '#98A2BF' }]}>
-            <TouchableOpacity onPress={()=>cameraLaunch(true)} style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => cameraLaunch(true)} style={{ justifyContent: 'center', alignItems: 'center' }}>
 
               <View style={styles.LottieViewContainer}>
                 {Platform.OS != 'web' ?
@@ -396,7 +472,7 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
           </View>}
 
 
-        <TouchableOpacity onPress={()=>cameraLaunch(true)} style={styles.cameraButton}  >
+        <TouchableOpacity onPress={() => cameraLaunch(true)} style={styles.cameraButton}  >
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
 
             <Icon name='camera' size={rfv(20)} color='white' />
@@ -429,13 +505,14 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
           <Text style={styles.inputlebel}>Lottery Name</Text>
 
           <View style={[styles.input, { borderColor: lotteryName === null ? 'red' : '#98A2BF', justifyContent: 'center' }]}>
-            <Picker
+
+            {/*<Picker
               selectedValue={lotteryName}
-              mode='dropdown'
+             mode="dropdown"
               dropdownIconColor='#98A2BF'
               dropdownIconRippleColor='#E1E1F5'
              
-
+             
               style={styles.dropdownStyle}
               onValueChange={(itemValue, itemIndex) =>
                 setLotteryName(itemValue)
@@ -453,7 +530,15 @@ const  cameraLaunch=(croping, mediaType = 'photo')=> {
 
                 />)}
 
-            </Picker>
+              </Picker>*/}
+            <TouchableOpacity onPress={() => setlTotteryNamesVisible(!lotteryNamesVisible)} style={{ height: '100%', width: '100%' }}>
+              <View style={{ height: '100%', flexDirection: "row", justifyContent: 'space-between', alignContent: 'center', alignItems: 'center' }}>
+
+                <Text style={styles.inputlebel}>{selectedLotteryName}</Text>
+                <Icon name='arrow-down-drop-circle' size={rfv(16)} color='#98A2BF' />
+              </View>
+
+            </TouchableOpacity>
           </View>
 
 
@@ -616,7 +701,7 @@ const styles = StyleSheet.create({
   inputlebel: {
     fontSize: rfv(10),
     color: '#98A2BF',
-    marginHorizontal: 10
+    //marginHorizontal: 10
   },
 
 
@@ -624,7 +709,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: rfv(12),
-  
+
   },
   buttonStyle: {
     justifyContent: 'center',
@@ -682,6 +767,7 @@ const styles = StyleSheet.create({
 
   },
   dropdownStyle: {
+    width: "100%",
     color: '#98A2BF',
     size: 10,
     alignSelf: 'auto',
@@ -762,8 +848,41 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: 'white',
     fontSize: rfv(10),
-    
+
   },
+
+  modalButtonContainer: {
+
+    width: '100%',
+
+    justifyContent: 'center',
+    paddingVertical: 10,
+    backgroundColor: colors.primary,
+    //paddingBottom:30,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderWidth: 1,
+    borderTopColor: '#98A2BF',
+    borderLeftColor: '#98A2BF',
+    borderRightColor: '#98A2BF',
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
+
+
+  },
+  closeButton: {
+    backgroundColor: '#208EFD',
+    width: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    borderRadius: 5,
+    height: dew_Width <= 600 ? 40 : 60,
+    marginBottom: 20
+
+  },
+
 
 
 });

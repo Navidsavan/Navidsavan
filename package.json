@@ -38,7 +38,7 @@
     "react-native-fontawesome": "^7.0.0",
     "react-native-fs": "^2.19.0",
     "react-native-gesture-handler": "^2.1.0",
-    "react-native-image-crop-picker": "^0.37.3",
+    "react-native-image-crop-picker": "^0.38.0",
     "react-native-ionicons": "^4.6.5",
     "react-native-lottie-splash-screen": "^0.1.14",
     "react-native-modal": "^13.0.0",

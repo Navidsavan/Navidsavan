@@ -76,7 +76,7 @@ const BottomTabNavigator = (props) => {
 
 
         }} />
-     { Platform.OS=="android"?<Tab.Screen name='Add Winner' component={AddWinnerScreen}
+     <Tab.Screen name='Add Winner' component={AddWinnerScreen}
         options={{
           tabBarActiveTintColor: 'white',
 
@@ -85,7 +85,7 @@ const BottomTabNavigator = (props) => {
           tabBarIcon: ({ color, size }) => (
             <Icon name="trophy" color={color} size={dew_Width > 700 ? rfv(30) : rfv(25)} />
           ),
-        }} />:null}
+        }} />
       <Tab.Screen name='End Shift' component={EndShiftScreen}
         options={{
           tabBarActiveTintColor: 'white',
